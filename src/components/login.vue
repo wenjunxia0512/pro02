@@ -13,7 +13,7 @@
         </el-form-item>
         <el-row>
           <el-col :offset="15">
-            <el-button type="primary" @click="login">登陆</el-button>
+            <el-button type="primary" @click = 'login'>登陆</el-button>
             <el-button type="info" @click = 'resetForm'>重置</el-button>
           </el-col>
         </el-row>
@@ -27,8 +27,8 @@ export default {
   data() {
     return {
       loginForm: {
-        username: "",
-        password: ""
+        username: "admin",
+        password: "123456"
       },
        //   给各个表单域进行校验
     loginFormRules: {
@@ -51,19 +51,29 @@ export default {
   },
   methods: {
     login() {
-      this.$refs.loginFormRef.validate(async valid =>{  
+      
+      this.$refs.loginFormRef.validate( valid =>{
+
         if (valid === true) {
 
-            const {data:res} = await this.$http.post('/login', this.loginForm)
+              this.$http.post('/login', this.loginForm)
+             .then(res=>{
+              if(res.data.meta.status !==200){
+                this.$message.error(res.data.meta.msg)
+              }else{
+                this.$message.success(res.data.meta.msg)
+                sessionStorage.setItem('token',res.data.data.token)
+                this.$router.push('/Home')
+              }
+             })
+             .catch(err=>{
+               console.log(err)
+             })                                                               
 
-            // 判断用户名和密码
-            if(res.meta.status !== 200) {
-                return this.$message.error('用户名和密码不存在')
-            }
-            // 通过浏览器的sessionStorage记录服务器返回的token信息
-            window.sessionStorage.setItem('token',res.data.token)
-          //   页面重定向到后台首页
-          this.$router.push("/Home");
+             
+
+
+            
         }
       })
     },
@@ -79,7 +89,7 @@ export default {
 #login-container {
   background-color: #2b4b6b;
   height: 100%;
-  overflow: hidden;
+  overflow: hidden;                                              
   #login-box {
     width: 450px;
     height: 304px;
